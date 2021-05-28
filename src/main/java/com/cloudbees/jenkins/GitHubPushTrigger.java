@@ -35,6 +35,7 @@ import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.Stapler;
+import org.kohsuke.github.GHEventPayload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -146,8 +147,29 @@ public class GitHubPushTrigger extends Trigger<Job<?, ?>> implements GitHubTrigg
                 return false;
             }
 
+            private boolean checkPayload() {
+                GHEventPayload.Push push = event.getPush(); // TODO implement this
+                if (push == null) {
+                    // TODO TBD
+                    return false;
+                }
+                // todo implement cf
+                if (push.getRef() != currentJob.TBD.branch()) {
+                    return false;
+                }
+
+                // TODO cf https://github.com/jenkinsci/git-plugin/blob/master/src/main/java/hudson/plugins/git/extensions/impl/PathRestriction.java
+
+                // TODO read included, excluded regions
+                // TODO sum up all commits, added, removed, modified
+                // TODO run logic for comparison
+//                push.getCommits().each.added+removed+modified in included regions / excluded regions
+
+                return true;
+            }
+
             public void run() {
-                if (runPolling()) {
+                if (checkPayload() && runPolling()) { // todo use polling by default, introduce new option to select payload check instead
                     GitHubPushCause cause;
                     try {
                         cause = new GitHubPushCause(getLogFileForJob(currentJob), pushBy);
